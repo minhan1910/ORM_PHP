@@ -15,6 +15,7 @@ class DB
         }
     }
 
+    // Just one instance for connecting database
     public static function getInstance(): DB
     {
         if (self::$instance === null)
