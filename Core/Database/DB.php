@@ -5,13 +5,21 @@ namespace Core\Database;
 class DB
 {
     private $connection = null;
+    private static $instance = null;
 
-    public function __construct()
+    private function __construct()
     {
         $this->connection = new \mysqli('localhost', 'root', '', 'orm');
         if ($this->connection->connect_error) {
             die($this->connection->error);
         }
+    }
+
+    public static function getInstance(): DB
+    {
+        if (self::$instance === null)
+            return self::$instance = new DB;
+        return self::$instance;
     }
 
     public function query(string $sql = ''): \mysqli_result | bool
@@ -20,7 +28,7 @@ class DB
         return $result;
     }
 
-    // stdClass như empty Object bên java
+    // stdClass like empty Object in Java
     public function fetch(string $sql, $class = \stdClass::class): array
     {
         $result = $this->query($sql);
