@@ -47,4 +47,34 @@ class DB
 
         throw new \Exception($this->connection->error);
     }
+
+    public function insert(string $sql): int
+    {
+        $result = $this->query($sql);
+
+        if ($result)
+            return $this->connection->affected_rows;
+
+        throw new \Exception($this->connection->error);
+    }
+
+    public function update(string $sql): int
+    {
+        $result = $this->query($sql);
+
+        if ($result)
+            return $result;
+
+        throw new \Exception($this->connection->error);
+    }
+
+    public function delete(string $sql): int
+    {
+        $result = $this->query($sql);
+
+        if ($result)
+            return $this->connection->affected_rows;
+
+        throw new \Exception($this->connection->error);
+    }
 }
