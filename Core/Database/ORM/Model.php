@@ -4,6 +4,7 @@ namespace Core\Database\ORM;
 
 use Core\Database\DB;
 use Core\Helpers;
+use Core\Database\ORM\Relations\HasManyRelation;
 
 class Model
 {
@@ -15,11 +16,25 @@ class Model
      * deleting and updating all records in model
      */
     protected static $builder_callable_methods = [
-        'all', 'where', 'orWhere', 'whereIn',
-        'orWhereIn', 'select', 'join', 'sum',
-        'avg', 'count', 'min', 'max',
-        'limit', 'offset', 'first', 'find',
-        'create', 'update', 'delete'
+        'all', // implementing
+        'select',
+        'join',
+        'sum',
+        'avg',
+        'count',
+        'min',
+        'max',
+        'limit',
+        'offset',
+        'first',
+        'find',
+        'create',
+        'update',
+        'delete',
+        'where',
+        'orWhere',
+        'whereIn',
+        'orWhereIn',
     ];
 
     public static function __callStatic($method, $args)
@@ -33,6 +48,42 @@ class Model
         }
         return call_user_func_array([$class, $method], $args);
     }
+
+    /**
+     * Example:
+     * $user = User::find(1)
+     * $relation= $user
+     *              ->posts()
+     *              ->toSql();
+     * => Build Query:
+     *  select posts.* 
+     *  from posts
+     *  where posts.userId = 1;
+     */
+    public function hasMany($relationClass, $foreignKey, $localKey = null)
+    {
+        $localKey = !empty($localKey)  ? $localKey : $this->primaryKey;
+        $relation_model = new $relationClass;
+        //$this->table is instance like user->post() -> $this is user 
+        $relation = new HasManyRelation(
+            $this->table,
+            $relation_model->getTable(),
+            $foreignKey,
+            $localKey
+        );
+        $primaryKey = $this->primaryKey;
+        $relation->model($relation_model); // model from Builder
+        if (isset($this->{$primaryKey})) { // check must be real model 
+            $relation->referenceModel($this);
+            $relation->initiateConnection();
+        }
+        return $relation;
+    }
+
+    public function belongsTo($relationClass, $foreignKey, $localKey)
+    {
+    }
+
 
     public function getPrimaryKey(): string
     {
@@ -54,13 +105,13 @@ class Model
         $pk = $this->primaryKey;
 
         // Must be have to instance model after retrieving by find or first method;
-        if (!isset($this->$pk))
+        if (!isset($this->{$pk}))
             return false;
 
         // $this->pk when user->id = 3 -> $this->id = 3
         return DB::getInstance()
             ->table($this->table)
-            ->where($this->primaryKey, '=', $this->$pk)
+            ->where($this->primaryKey, '=', $this->{$pk})
             ->delete();
     }
 
@@ -68,43 +119,61 @@ class Model
     {
         $pk = $this->primaryKey;
 
-        if (!isset($this->$pk))
+        if (!isset($this->{$pk}))
             return false;
 
         return DB::getInstance()
             ->table($this->table)
-            ->where($this->primaryKey, '=', $this->$pk)
+            ->where($this->primaryKey, '=', $this->{$pk})
             ->update($data);
     }
 
-
+    /**
+     * How can use this method ?
+     * 
+     * $instanceModel = new Model;
+     * $instanceModel->name = 'test';
+     * $instanceModel->age = 12;
+     * $instanceModel->save()
+     * 
+     * @property $data is get all properties of instanceModel like name, age.
+     * @property $cols is get all columns of table in database
+     * @property $this->primaryKey is 'id' (string)
+     * @property $this->$primaryKey ($this->id) is numeric result
+     * 
+     * If instanceModel has $id -> existed
+     *      => Update it.
+     * Else => Create new instance and update new $id into it.
+     *  
+     */
     public function save()
     {
         $data = Helpers::get_object_public_fields($this);
-        $cols = DB::getInstance()->fetch('SHOW COLUMNS FROM ' . $this->table);
+        $cols = DB::getInstance()
+            ->fetch('SHOW COLUMNS FROM ' . $this->table);
 
         // Drop unexpected fields
         foreach ($data as $name => $value) {
             $filtered_cols = array_filter($cols, function ($col) use ($name) {
                 return $name === $col->Field;
             });
-            if (!count($filtered_cols))
+            if (empty($filtered_cols))
                 unset($data[$name]);
         }
 
         $primaryKey = $this->primaryKey;
 
         // value of $primaryKey is 'id'
-        if (isset($this->$primaryKey))
+        if (isset($this->{$primaryKey}))
             return DB::getInstance()
                 ->table($this->table)
-                ->where($this->primaryKey, '=', $this->primaryKey)
+                ->where($this->primaryKey, '=', $this->{$primaryKey})
                 ->update($data);
 
         $id = DB::getInstance()
             ->table($this->table)
             ->insertGetId($data);
-        $this->$primaryKey = $id; // set id for for new instance
+        $this->{$primaryKey} = $id; // set id for for new instance
 
         return $id;
     }

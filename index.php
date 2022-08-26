@@ -9,7 +9,19 @@ require_once ROOT . '/Core/helpers.php';
 use Core\Database\CommandBuilder;
 use Core\Helpers;
 
-$builder = new CommandBuilder;
+use Models\User;
+
+$user = User::find(1);
+
+
+$posts = $user->posts()->get();
+// $post = $user->posts()->where('title', '=', 'Danial second post')->update([
+//     'title' => 'Danial simple post'
+// ]);
+foreach ($posts as $post) {
+    echo $post->title;
+    echo '<br>';
+}
 
 // $command = $builder
 //     ->table('users')
@@ -60,17 +72,6 @@ $builder = new CommandBuilder;
 //         'name' => 'MinAn'
 //     ]);
 
-use Core\Database\ORM\Model;
-
-class User extends Model
-{
-    protected $table = 'users';
-
-    public static function getNewUsers()
-    {
-        echo 'new user';
-    }
-}
 
 // $user = new User;
 // Helpers::formatArray(
@@ -100,7 +101,9 @@ class User extends Model
 // echo $user->update([
 //     'name' => 'Di', 'age' => 20
 // ]);
-$user = new User;
-$user->name = 'An123';
-$user->age = 13;
-$user->save();
+
+// $user = User::find(4);
+// $user->name = 'An123';
+// $user->age = 13;
+// $user->email = 'an123@gmail.com';
+// $user->save();
