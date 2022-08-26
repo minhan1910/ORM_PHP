@@ -10,18 +10,22 @@ use Core\Database\CommandBuilder;
 use Core\Helpers;
 
 use Models\User;
+use Models\Post;
 
-$user = User::find(1);
-
-
-$posts = $user->posts()->get();
+$post = new Post;
+echo $users = $post->user()->toSql();
+// foreach ($users as $user) {
+    // echo $user->name;
+// }
+// $user = User::find(1);
+// $posts = $user->posts()->get();
 // $post = $user->posts()->where('title', '=', 'Danial second post')->update([
 //     'title' => 'Danial simple post'
 // ]);
-foreach ($posts as $post) {
-    echo $post->title;
-    echo '<br>';
-}
+// foreach ($posts as $post) {
+//     echo $post->title;
+//     echo '<br>';
+// }
 
 // $command = $builder
 //     ->table('users')

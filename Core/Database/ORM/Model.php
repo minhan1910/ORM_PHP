@@ -3,6 +3,7 @@
 namespace Core\Database\ORM;
 
 use Core\Database\DB;
+use Core\Database\ORM\Relations\BelongsToRelation;
 use Core\Helpers;
 use Core\Database\ORM\Relations\HasManyRelation;
 
@@ -73,15 +74,45 @@ class Model
         );
         $primaryKey = $this->primaryKey;
         $relation->model($relation_model); // model from Builder
-        if (isset($this->{$primaryKey})) { // check must be real model 
+        if (isset($this->{$primaryKey}))  // check must be real model 
             $relation->referenceModel($this);
-            $relation->initiateConnection();
-        }
+        $relation->initiateConnection();
+
         return $relation;
     }
 
-    public function belongsTo($relationClass, $foreignKey, $localKey)
+    /**
+     * How to use and build query ?
+     * 
+     * With specific post id
+     * $post = Post::find(1);
+     * $relation = $post->user()->toSql();
+     * Query: select users.* from users where users.id = 1 (1 is posts.userId)
+     * NOT: select users.* from users where posts.userId = 1
+     * -----------------------------------------------------
+     * Not id in $post -> can get all users
+     * If $post = new Post; 
+     * $relation = $post->user()->toSql();
+     * 
+     * Query: select users.* from users
+     */
+    public function belongsTo($relationClass, $foreignKey, $localKey = null)
     {
+        $localKey = !empty($localKey) ? $localKey : $this->primaryKey;
+        $relation_model = new $relationClass;
+        $relation = new BelongsToRelation(
+            $this->table,
+            $relation_model->getTable(),
+            $foreignKey,
+            $localKey
+        );
+        $relation->model($relation_model);
+        $primaryKey = $this->primaryKey;
+        if (!empty($this->{$primaryKey}))
+            $relation->referenceModel($this);
+        $relation->initiateConnection();
+
+        return $relation;
     }
 
 

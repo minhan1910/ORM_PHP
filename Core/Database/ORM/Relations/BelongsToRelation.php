@@ -2,9 +2,10 @@
 
 namespace Core\Database\ORM\Relations;
 
-class HasManyRelation extends Relation
+class BelongsToRelation extends Relation
 {
-    protected $type = 'has_many';
+
+    protected $type = 'belongs_to';
     protected $referenceTable;
     protected $relationTable;
     protected $foreignKey;
@@ -16,7 +17,6 @@ class HasManyRelation extends Relation
         $foreignKey,
         $localKey
     ) {
-        // For new CommandBuilder in Builder class
         parent::__construct();
         $this->referenceTable = $referenceTable;
         $this->relationTable = $relationTable;
@@ -26,18 +26,15 @@ class HasManyRelation extends Relation
 
     public function initiateConnection()
     {
-        $referenceModel = $this->referenceModel; // object in Model
+        $referenceModel = $this->referenceModel;
         if (!$this->connectionInitiated && !empty($referenceModel)) {
-            $localKey = $this->localKey;
+            $foreignKey = $this->foreignKey;
             $this->where(
                 $this->relationTable . '.' . $this->localKey,
                 '=',
-                // user object and localKey is id column name
-                $referenceModel->{$localKey}
+                $referenceModel->{$foreignKey}
             );
-            $this->connectionInitiated = true;
         }
-
         return $this;
     }
 }
