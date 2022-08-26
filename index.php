@@ -38,12 +38,12 @@ $builder = new CommandBuilder;
 //     ->sum('age');
 // echo $command;
 
-$arr = [
-    ['name' => 'An', 'age' => 18],
-    ['name' => 'Huy', 'age' => 18],
-];
+// $arr = [
+//     ['name' => 'An', 'age' => 18],
+//     ['name' => 'Huy', 'age' => 18],
+// ];
 
-$arrAssoc = ['name' => 'An', 'age' => 18];
+// $arrAssoc = ['name' => 'An', 'age' => 18];
 // var_dump($arrAssoc);
 // echo $builder->table('users')->insert($arr);
 // echo $builder->table('users')->insert($arrAssoc);
@@ -53,9 +53,54 @@ $arrAssoc = ['name' => 'An', 'age' => 18];
 //     ->where('id', '=', 7)
 //     ->delete();
 
-echo $builder
-    ->table('users')
-    ->where('name', '=', 'An')
-    ->update([
-        'name' => 'MinAn'
-    ]);
+// echo $builder
+//     ->table('users')
+//     ->where('name', '=', 'An')
+//     ->update([
+//         'name' => 'MinAn'
+//     ]);
+
+use Core\Database\ORM\Model;
+
+class User extends Model
+{
+    protected $table = 'users';
+
+    public static function getNewUsers()
+    {
+        echo 'new user';
+    }
+}
+
+// $user = new User;
+// Helpers::formatArray(
+//     $user::select('name')
+//         ->where('name', '=', 'MinAn')
+//         ->orWhere('name', '=', 'Danial')
+//         ->all()
+// );
+
+// echo User::select('name')
+//     ->where('name', '=', 'Danial')
+//     ->avg('age');
+// ->toSql();
+
+// $user = User::create([
+//     'name' => 'Hun2',
+//     'Age' => 19
+// ]);
+// Helpers::formatObject($user);
+
+// User::where('name', '=', 'Danial')->orWhere('id', '=', 6)->update([
+//     'age' => 12
+// ]);
+
+// $user = User::find(8);
+// Helpers::formatObject($user);
+// echo $user->update([
+//     'name' => 'Di', 'age' => 20
+// ]);
+$user = new User;
+$user->name = 'An123';
+$user->age = 13;
+$user->save();

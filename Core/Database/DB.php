@@ -2,6 +2,8 @@
 
 namespace Core\Database;
 
+use Core\Database\CommandBuilder;
+
 class DB
 {
     private $connection = null;
@@ -13,6 +15,11 @@ class DB
         if ($this->connection->connect_error) {
             die($this->connection->error);
         }
+    }
+
+    public function table($table)
+    {
+        return (new CommandBuilder)->table($table);
     }
 
     // Just one instance for connecting database

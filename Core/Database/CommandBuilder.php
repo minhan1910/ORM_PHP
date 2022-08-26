@@ -233,63 +233,82 @@ class CommandBuilder
     public function avg(string $col): float | int
     {
         $select = ["AVG({$col})"];
+
         $this->select($select);
         $data = $this->get();
+
         $obj = current($data);
         $prop = current($select);
+
         return $obj->$prop;
     }
 
     public function sum(string $col): float | int
     {
         $select = ["SUM({$col})"];
+
         $this->select($select);
         $data = $this->get();
+
         $obj = current($data);
         $prop = current($select);
+
         return $obj->$prop;
     }
 
     public function count(string $col): float | int
     {
         $select = ["COUNT({$col})"];
+
         $this->select($select);
         $data = $this->get();
+
         $obj = current($data);
         $prop = current($select);
+
         return $obj->$prop;
     }
 
     public function min(string $col): float | int
     {
         $select = ["MIN({$col})"];
+
         $this->select($select);
         $data = $this->get();
+
         $obj = current($data);
         $prop = current($select);
+
         return $obj->$prop;
     }
 
     public function max(string $col): float | int
     {
         $select = ["MAX({$col})"];
+
         $this->select($select);
         $data = $this->get();
+
         $obj = current($data);
         $prop = current($select);
+
         return $obj->$prop;
     }
 
     public function insert(array $data)
     {
         $this->buildInsertCommand($data);
-        return DB::getInstance()->insert($this->commandString);
+
+        return DB::getInstance()
+            ->insert($this->commandString);
     }
 
     public function insertGetId(array $data)
     {
         $this->buildInsertCommand($data);
-        return DB::getInstance()->insertGetId($this->commandString);
+
+        return DB::getInstance()
+            ->insertGetId($this->commandString);
     }
 
     /**
@@ -307,12 +326,8 @@ class CommandBuilder
     private function buildInsertCommand(array $data): CommandBuilder
     {
         $cols = [];
-        if (Helpers::is_assoc($data)) {
-            $cols = array_keys($data);
-        } else {
-            // vd như người dùng để các col theo đúng thứ tự nên chỉ cần lấy cái thứ 1
-            $cols = array_keys($data[0]);
-        }
+        // vd như người dùng để các col theo đúng thứ tự nên chỉ cần lấy cái thứ 1
+        $cols = Helpers::is_assoc($data) ? array_keys($data) : array_keys($data[0]);
 
         $command = 'insert into ' . $this->table . ' (' . implode(',', $cols) . ') values ';
 
@@ -332,14 +347,18 @@ class CommandBuilder
     public function delete(): int
     {
         $this->buildDeleteCommand();
-        return DB::getInstance()->delete($this->commandString);
+
+        return DB::getInstance()
+            ->delete($this->commandString);
     }
 
     private function buildDeleteCommand(): CommandBuilder
     {
         $command = 'delete from ' . $this->table;
+
         if (!empty($this->where))
             $command .= $this->where;
+
         $this->commandString = $command;
 
         return $this;
@@ -348,15 +367,18 @@ class CommandBuilder
     public function update(array $data): int
     {
         $this->buildUpdateCommand($data);
-        return DB::getInstance()->update($this->commandString);
+
+        return DB::getInstance()
+            ->update($this->commandString);
     }
 
     private function buildUpdateCommand(array $data): CommandBuilder
     {
         $command = 'update ' . $this->table . ' set ';
-        foreach ($data as $col => $value) {
+
+        foreach ($data as $col => $value)
             $command .= $col . "= '" . $value . "', ";
-        }
+
         $command = substr($command, 0, strrpos($command, ','));
 
         if (!empty($this->where))

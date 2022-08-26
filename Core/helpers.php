@@ -41,4 +41,9 @@ class Helpers
         // return $keys !== range(0, count($data) - 1);
         return array_diff_assoc($keys, range(0, count($data) - 1)) ? 1 : null;
     }
+
+    public static function get_object_public_fields(object $object)
+    {
+        return get_object_vars($object);
+    }
 }
