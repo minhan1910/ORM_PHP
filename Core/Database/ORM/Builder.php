@@ -145,16 +145,15 @@ class Builder
     }
 
     /** first, find, create */
-    public function first(): object
+    public function first(): object | null
     {
         $this->limit(1);
         $data = $this->get();
-
         // Actually 1 row
-        return count($data) > 0 ? current($data) : null;
+        return !empty($data) ? current($data) : null;
     }
 
-    public function find($id): object
+    public function find($id): object | null
     {
         $primaryKey = $this
             ->model
@@ -165,12 +164,16 @@ class Builder
             ->first();
     }
 
-    public function create(array $data)
+    public function create(array $data): object | null
     {
         $new_id = $this
             ->commandBuilder
             ->table($this->getModelTable())
             ->insertGetId($data);
+
+        // For hasOne relationship
+        if (array_key_exists('id', $data) && isset($data['id']))
+            $new_id = $data['id'];
 
         return call_user_func_array([$this, 'find'], [$new_id]);
     }
@@ -191,7 +194,7 @@ class Builder
             ->update($data);
     }
 
-    public function getModelTable()
+    public function getModelTable(): string
     {
         return $this->model->getTable();
     }

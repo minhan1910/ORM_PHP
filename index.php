@@ -9,11 +9,29 @@ require_once ROOT . '/Core/helpers.php';
 use Core\Database\CommandBuilder;
 use Core\Helpers;
 
-use Models\User;
-use Models\Post;
+use Models\{
+    User,
+    Post,
+    Profile
+};
 
-$post = new Post;
-echo $users = $post->user()->toSql();
+/**
+ * hasOne
+ */
+// $user = User::first();
+// $user->profile()->create([
+//     'id' => $user->id,
+//     'country' => 'USA',
+//     'city' => 'California'
+// ]);
+
+// $profile = Profile::first();
+// echo $profile->user()->first()->id;
+
+
+
+// $post = new Post;
+// echo $users = $post->user()->toSql();
 // foreach ($users as $user) {
     // echo $user->name;
 // }

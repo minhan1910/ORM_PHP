@@ -6,6 +6,7 @@ use Core\Database\DB;
 use Core\Database\ORM\Relations\BelongsToRelation;
 use Core\Helpers;
 use Core\Database\ORM\Relations\HasManyRelation;
+use Core\Database\ORM\Relations\HasOneRelation;
 
 class Model
 {
@@ -108,6 +109,32 @@ class Model
         );
         $relation->model($relation_model);
         $primaryKey = $this->primaryKey;
+        if (!empty($this->{$primaryKey}))
+            $relation->referenceModel($this);
+        $relation->initiateConnection();
+
+        return $relation;
+    }
+
+    /**
+     * user hasOne profile
+     * $user = User::find(1);
+     * $relation = $user->profile()->toSql();
+     * 
+     * Query: select profiles.* from profiles where users.profileId = 1
+     * 1 is $user->id <=> $this->{$primaryKey}
+     */
+    public function hasOne($relationClass)
+    {
+        $relation_model = new $relationClass;
+        $primaryKey = $this->primaryKey;
+        $relation = new HasOneRelation(
+            $this->table,
+            $relation_model->getTable(),
+            $relation_model->getPrimaryKey(),
+            $primaryKey
+        );
+        $relation->model($relation_model);
         if (!empty($this->{$primaryKey}))
             $relation->referenceModel($this);
         $relation->initiateConnection();

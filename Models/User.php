@@ -3,7 +3,7 @@
 namespace Models;
 
 use Core\Database\ORM\Model;
-use Models\Post;
+use Models\{Post, Profile};
 
 class User extends Model
 {
@@ -12,5 +12,10 @@ class User extends Model
     public function posts()
     {
         return $this->hasMany(Post::class, 'userId', 'id');
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
     }
 }
