@@ -3,16 +3,44 @@
 namespace Core\Database\ORM;
 
 use Core\Database\CommandBuilder;
+use Core\Helpers;
 
 class Builder
 {
     protected $commandBuilder; // commandBuilder
     protected $model;
+    protected $relations = [];
 
     // Can use IoC or Dependency injection cũng tùy
     public function __construct()
     {
         $this->commandBuilder = new CommandBuilder;
+    }
+
+    /**
+     * Simulate this metod into command side:
+     * 
+     * User::with(['profile', 'posts' => function($posts) {
+     *      $posts->where('created_at', '>', '2020-09-23');
+     * }])->get();
+     */
+    public function with(array $relations = []): Builder
+    {
+        foreach ($relations as $relationKeyOrName => $relationNameOrClosure) {
+            if (is_string($relationNameOrClosure)) {
+                // Call to relationship of model
+                $relation = call_user_func_array([$this->model, $relationNameOrClosure], []);
+                $this->relations[$relationNameOrClosure] = $relation;
+            } else {
+                $relation = call_user_func_array([$this->model, $relationKeyOrName], []);
+                $relationNameOrClosure($relation);
+                $this->relations[$relationKeyOrName] = $relation;
+            }
+        }
+
+        // -- Not returned relation is relationModel 
+        // -- returned $this is referenceModel
+        return $this;
     }
 
     public function model($model): Builder
@@ -21,14 +49,39 @@ class Builder
         return $this;
     }
 
+    /** 
+     * 
+     * Nhức Đầu :>
+     */
     public function get(): array
     {
         $classModelName = get_class($this->model); // get the class name of instance
 
-        return $this
+        // $data contains difference of objects of referenceModel
+        $data = $this
             ->commandBuilder
             ->table($this->getModelTable())
             ->get($classModelName);
+
+
+
+        // For Eager loading and manipulating data returned
+        if (count($data) && count($this->relations)) {
+            foreach ($this->relations as $relationName => $relation) {
+                // Step 1: 
+                $relation->buildRelationDataQuery($data);
+
+                // Step 2:
+                // after filter all ids of referenceModel
+                $relation_data = $relation->get();
+
+                // Step 3: 
+                // Maybe not retuern array data from addRelationData
+                $data = $relation->addRelationData($relationName, $data, $relation_data);
+            }
+        }
+
+        return $data;
     }
 
     public function where(): Builder
@@ -149,6 +202,7 @@ class Builder
     {
         $this->limit(1);
         $data = $this->get();
+
         // Actually 1 row
         return !empty($data) ? current($data) : null;
     }

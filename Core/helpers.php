@@ -13,6 +13,8 @@ class Helpers
 
     public static function formatObject(object $object)
     {
+        if (!$object)
+            return null;
         echo '<pre>';
         print_r($object);
         echo '</pre>';

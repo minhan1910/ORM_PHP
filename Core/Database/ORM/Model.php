@@ -3,6 +3,7 @@
 namespace Core\Database\ORM;
 
 use Core\Database\DB;
+use Core\Database\ORM\Relations\BelongsToManyRelation;
 use Core\Database\ORM\Relations\BelongsToRelation;
 use Core\Helpers;
 use Core\Database\ORM\Relations\HasManyRelation;
@@ -21,6 +22,7 @@ class Model
         'all', // implementing
         'select',
         'join',
+        'get',
         'sum',
         'avg',
         'count',
@@ -30,6 +32,7 @@ class Model
         'offset',
         'first',
         'find',
+        'with',
         'create',
         'update',
         'delete',
@@ -153,12 +156,42 @@ class Model
         return $this->table;
     }
 
+    public function belongsToMany(
+        $relationClass,
+        $pivot_table,
+        $referenceTableForeignKey,
+        $relationTableForeignKey,
+        $localKey = null
+    ) {
+        $primaryKey = $this->primaryKey;
+        $localKey = !empty($localKey) ? $localKey : $primaryKey;
+        $relation_model = new $relationClass;
+
+        $relation = new BelongsToManyRelation(
+            $this->table,
+            $pivot_table,
+            $relation_model->getTable(),
+            $referenceTableForeignKey,
+            $relationTableForeignKey,
+            $localKey,
+            $relation_model->getPrimaryKey(),
+        );
+
+        $relation->model($relation_model);
+
+        if (isset($this->{$primaryKey}))
+            $relation->referenceModel($this);
+        $relation->initiateConnection();
+
+        return $relation;
+    }
+
     /** 
      * Use:
      * $instanceModel = Model::find(1);
      * $instanceModel->delete();
      */
-    public function delete()
+    public function remove()
     {
         $pk = $this->primaryKey;
 
@@ -173,7 +206,17 @@ class Model
             ->delete();
     }
 
-    public function update(array $data)
+    /**
+     * Not use update like static update when call in Builder class
+     * 
+     * vì khi bắt đâu mehtod nó sẽ gọi non static method và sau đó
+     * vào __callStaic gọi tiếp cái update bên Builder class
+     * 
+     * => Throw non object context error 
+     * 
+     * Solution: rename one of each method in Model or Builder class
+     */
+    public function updateSingle(array $data)
     {
         $pk = $this->primaryKey;
 

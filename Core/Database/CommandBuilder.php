@@ -21,7 +21,7 @@ class CommandBuilder
     private array  $select         = [];
     private string $where          = '';
     private string $join           = '';
-    private string $orderBy         = '';
+    private string $orderBy        = '';
     private string $groupBy        = '';
     private string $having         = '';
     private string $offset         = '';

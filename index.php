@@ -15,6 +15,62 @@ use Models\{
     Profile
 };
 
+$users = User::with(['ratedPosts'])->limit(3)->get();
+foreach ($users as $user) {
+    echo $user->name . '<br>';
+    foreach ($user->ratedPosts as $post)
+        echo $post->title . '<br>';
+}
+
+
+/**
+ * Fix user created with user's id
+ */
+// $user = User::find(10);
+// $post = $user->posts()->create([
+//     'title' => 'An first post',
+// ]);
+
+
+/**
+ * Eager loading hasOne
+ */
+// $user = User::with(['profile'])->first();
+// echo $user->profile->country;
+
+// $profile = Profile::with(['user'])->first();
+// $posts = Post::with(['user'])->get();
+
+// $user = User::find(1);
+// $posts = $user->posts()->get();
+// foreach ($posts as $post) {
+//     echo $post->title . ' ' . $user->id;
+// }
+
+// $users = User::with(['profile', 'posts'])->get();
+// $users = User::with(['profile', 'posts' => function ($query) {
+//     $query->where('title', '=', 'Alex first post');
+// }])->get();
+// foreach ($users as $user) {
+//     echo '<br>';
+//     foreach ($user->posts as $post) {
+//         echo '<br>';
+//         echo $post->title . ' ' . $user->id;
+//         echo '<br>';
+//     }
+//     echo '<br>';
+// }
+
+// $profile = Profile::with(['user'])->first();
+// echo $profile->user->name;
+
+/**
+ * Eager loading hasMany
+ */
+// $users = User::with(['posts'])->get();
+// $user = $users[0];
+// echo $user->name;
+
 /**
  * hasOne
  */

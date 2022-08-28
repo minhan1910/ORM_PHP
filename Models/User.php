@@ -18,4 +18,14 @@ class User extends Model
     {
         return $this->hasOne(Profile::class);
     }
+
+    // public function ratedPosts()
+    // {
+    //     return $this->belongsToMany(Post::class, 'ratings', 'userId', 'postId')->withPivot('rating');
+    // }
+
+    public function ratedPosts()
+    {
+        return $this->belongsToMany('Models\Post', 'ratings', 'userId', 'postId')->withPivot('rating');
+    }
 }

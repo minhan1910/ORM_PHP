@@ -23,4 +23,8 @@ abstract class Relation extends Builder
     }
 
     public abstract function initiateConnection();
+
+    public abstract function buildRelationDataQuery(mixed $data);
+
+    public abstract function addRelationData(string $relationName, $data, $relation_data);
 }
