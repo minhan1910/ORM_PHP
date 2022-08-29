@@ -63,8 +63,6 @@ class Builder
             ->table($this->getModelTable())
             ->get($classModelName);
 
-
-
         // For Eager loading and manipulating data returned
         if (count($data) && count($this->relations)) {
             foreach ($this->relations as $relationName => $relation) {

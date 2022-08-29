@@ -192,10 +192,13 @@ class CommandBuilder
      */
     private function buildSelectCommand(): CommandBuilder
     {
+        // For use case just use offset command:
+        // instanceMode::offset(10)->get();
+        if (empty($this->limit) && !empty($this->offset))
+            $this->limit(PHP_INT_MAX);
+
         $command = '';
-
         $command = count($this->select) === 0 ? $this->table . '.*' : implode(',', $this->select);
-
         $command = 'select ' . $command . ' from ' . $this->table . " ";
 
         foreach ($this->select_command_clauses as $clause)

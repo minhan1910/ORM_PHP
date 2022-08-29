@@ -179,8 +179,10 @@ class Model
 
         $relation->model($relation_model);
 
+        // For lazy loading
         if (isset($this->{$primaryKey}))
             $relation->referenceModel($this);
+
         $relation->initiateConnection();
 
         return $relation;

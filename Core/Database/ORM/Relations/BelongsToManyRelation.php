@@ -85,12 +85,23 @@ class BelongsToManyRelation extends Relation
             );
         }
 
+
         $this->withPivot($this->referenceTableForeignKey);
+
+        // echo 'Debug in initiateConnection';
+        // echo '<br>';
+        // echo $this->toSql();
+        // // Helpers::formatArray($data);
+        // exit;
 
         return $this;
     }
 
-
+    /**
+     * Có thể nhận vào array hoặc string 
+     * vì gọi withPivot ở đây với lại có thể withPivot ở
+     * lúc belongsToMany trong Accessor of Model
+     */
     public function withPivot($cols)
     {
         $cols = is_array($cols) ? $cols : [$cols];
@@ -118,8 +129,15 @@ class BelongsToManyRelation extends Relation
         );
     }
 
+    /**
+     * add relation data for referenceData in Builder of RefernceModel Class
+     */
     public function addRelationData(string $relationName, $data, $relation_data)
     {
+        // echo $this->toSql();
+        // echo '<br>';
+        // Helpers::formatArray($relation_data);
+        // exit;
         $referenceTableLocalKey = $this->referenceTableLocalKey;
         $referenceTableForeignKey = $this->referenceTableForeignKey;
 
@@ -160,10 +178,10 @@ class BelongsToManyRelation extends Relation
                 $data[$key] = $data_object;
             }
         }
-        echo $this->toSql();
-        echo '<br>';
-        Helpers::formatArray($data);
-        exit;
+        // ec   ho $this->toSql();
+        // echo '<br>';
+        // Helpers::formatArray($data);
+        // exit;
         return $data;
     }
 
@@ -179,5 +197,63 @@ class BelongsToManyRelation extends Relation
         $model = parent::first();
         $data = $this->addPivotData([$model]);
         return current($data);
+    }
+
+    /**
+     * @var array $insertTableData sẽ cho cá
+     */
+    public function attach(array $data)
+    {
+        $insertTableData = [];
+        $referenceModel = $this->referenceModel;
+        $referenceTableLocalKey = $this->referenceTableLocalKey;
+
+        foreach ($data as $key => $value) {
+            /**
+             * insertTableRow để dùng theo format của insert method
+             */
+            $insertTableRow = [];
+            // For userId in context
+            $insertTableRow[$this->referenceTableForeignKey] = $referenceModel->{$referenceTableLocalKey};
+            if (is_array($value)) {
+                $insertTableRow[$this->relationTableForeignKey] = $key;
+                // ValueKey and ValueValue
+                foreach ($value as $vk => $vv)
+                    $insertTableRow[$vk] = $vv;
+            } else {
+                $insertTableRow[$this->relationTableForeignKey] = $value;
+            }
+            array_push($insertTableData, $insertTableRow);
+        }
+
+        $afftedRows = 0;
+        foreach ($insertTableData as $row) {
+            $res = DB::getInstance()
+                ->table($this->pivot_table)
+                ->insert($row);
+            ++$afftedRows;
+        }
+
+        return $afftedRows;
+    }
+
+
+    public function detach(array $data)
+    {
+        $referenceModel = $this->referenceModel;
+        $referenceTableLocalKey = $this->referenceTableLocalKey;
+
+        $cb = DB::getInstance()
+            ->table($this->pivot_table);
+
+        $cb->where(
+            $this->referenceTableForeignKey,
+            '=',
+            $referenceModel->{$referenceTableLocalKey}
+        );
+
+        $cb->whereIn($this->relationTableForeignKey, $data);
+
+        return $cb->delete();
     }
 }

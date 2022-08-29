@@ -15,12 +15,35 @@ use Models\{
     Profile
 };
 
-$users = User::with(['ratedPosts'])->limit(3)->get();
-foreach ($users as $user) {
-    echo $user->name . '<br>';
-    foreach ($user->ratedPosts as $post)
-        echo $post->title . '<br>';
-}
+/**
+ * Attach method
+ */
+// User::create(['name' => 'Maxim']);
+// $user = User::find(12);
+// $user
+//     ->ratedPosts()
+//     ->attach([
+//         11,
+//         20 => ['rating' => 2],
+//         14 => ['rating' => 5]
+//     ]);
+// $user
+//     ->ratedPosts()
+//     ->detach([11, 20, 14]);
+
+
+User::offset(10)->get();
+
+/**
+ * belongsToMany with pivotTable
+ */
+// $users = User::with(['ratedPosts'])->limit(3)->get();
+// Helpers::formatArray($users);
+// foreach ($users as $user) {
+//     echo $user->name . '<br>';
+//     foreach ($user->ratedPosts as $post)
+//         echo $post->pivot->rating . '<br>';
+// }
 
 
 /**
